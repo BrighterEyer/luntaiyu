@@ -20,15 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 public class BaseService extends CommonServiceImpl {
 
 
-    /**
-     * 关注
-     */
-    @Autowired
-    public AttentionService AttentionService;
-    @Autowired
-    public AttentionRepository AttentionRepository;
-    @Autowired
-    public AttentionMapper attentionMapper;
 
     /**
      * 收藏
@@ -51,8 +42,6 @@ public class BaseService extends CommonServiceImpl {
     /**
      * 兑换记录
      */
-    @Autowired
-    public ForRecordService forRecordService;
     @Autowired
     public ForRecordRepository forRecordRepository;
     @Autowired
@@ -122,15 +111,6 @@ public class BaseService extends CommonServiceImpl {
 
 
     /**
-     * 打卡
-     */
-    @Autowired
-    public PunchCardService punchCardService;
-    @Autowired
-    public PunchCardRepository punchCardRepository;
-    @Autowired
-    public PunchCardMapper punchCardMapper;
-    /**
      * 预约
      */
     @Autowired
@@ -171,15 +151,6 @@ public class BaseService extends CommonServiceImpl {
     public RankingMapper rankingMapper;
 
     /**
-     * 用户搭档
-     */
-    @Autowired
-    public UserCooperateService userCooperateService;
-    @Autowired
-    public UserCooperateRepository userCooperateRepository;
-    @Autowired
-    public UserCooperateMapper userCooperateMapper;
-    /**
      * 我的钱包
      */
     @Autowired
@@ -188,15 +159,6 @@ public class BaseService extends CommonServiceImpl {
     public WalletRepository walletRepository;
     @Autowired
     public WalletMapper walletMapper;
-    /**
-     * 提现
-     */
-    @Autowired
-    public WithdrawService withdrawService;
-    @Autowired
-    public WithdrawRepository withdrawRepository;
-    @Autowired
-    public WithdrawMapper withdrawMapper;
 
     @Autowired
     public TradingRecordService tradingRecordService;
@@ -235,13 +197,6 @@ public class BaseService extends CommonServiceImpl {
     @Autowired
     public BankCardMapper bankCardMapper;
 
-    /**
-     * 车型
-     *
-     * @return
-     */
-    @Autowired
-    public CarModelRepository carModelRepository;
 
     /**
      * 投诉
@@ -250,8 +205,6 @@ public class BaseService extends CommonServiceImpl {
     public ComplaintsService complaintsService;
     @Autowired
     public ComplaintsRepository complaintsRepository;
-    @Autowired
-    public ComplaintsMapper complaintsMapper;
 
     /**
      * 简介
@@ -293,11 +246,6 @@ public class BaseService extends CommonServiceImpl {
     @Autowired
     public InvoiceMapper invoiceMapper;
 
-    /**
-     * 物流
-     */
-    @Autowired
-    public LogisticsRepository logisticsRepository;
 
     /**
      * 消息
@@ -326,11 +274,6 @@ public class BaseService extends CommonServiceImpl {
     @Autowired
     public OrderDetailsRepository orderDetailsRepository;
 
-    /**
-     * 预约订单详情
-     */
-    @Autowired
-    public ReservationOrderDetailsRepository reservationOrderDetailsRepository;
     @Autowired
     public ReservationOrderDetailsMapper reservationOrderDetailsMapper;
 
