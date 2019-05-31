@@ -3,7 +3,6 @@ package com.zhangzhao.web.service.impl;
 import com.zhangzhao.common.entity.admin.Authority;
 import com.zhangzhao.common.vo.StatusVo;
 import com.zhangzhao.web.base.BaseService;
-import com.zhangzhao.web.service.ActivityService;
 import com.zhangzhao.web.service.AuthorityService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
