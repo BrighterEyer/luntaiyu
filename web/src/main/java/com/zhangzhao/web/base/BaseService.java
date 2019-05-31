@@ -28,8 +28,6 @@ public class BaseService extends CommonServiceImpl {
     @Autowired
     public UserRepository userRepository;
     @Autowired
-    public UserMapper userMapper;
-    @Autowired
     public AuthorityService authorityService;
     @Autowired
     public AuthorityRepository authorityRepository;
@@ -116,11 +114,7 @@ public class BaseService extends CommonServiceImpl {
      * @param request
      */
     @Autowired
-    public CommentsService commentsService;
-    @Autowired
     public CommentsRepository commentsRepository;
-    @Autowired
-    public CommentsMapper commentsMapper;
 
     @ModelAttribute
     public void setUrl(HttpServletRequest request) {
