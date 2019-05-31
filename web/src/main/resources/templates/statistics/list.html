@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>商家财务报表</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <div class="layui-btn-group">
+                <span class="layui-code">订单报表</span>
+            </div>
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th>总成交金额</th>
+                    <th>成交次数</th>
+                    <th>当年收益</th>
+                    <th>当季收益</th>
+                    <th>当月收益</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td th:text="${order?.zongChengjiaoe}"></td>
+                    <td th:text="${order?.chengJiaocishu}"></td>
+                    <td th:text="${order?.year}"></td>
+                    <td th:text="${order?.quarter}"></td>
+                    <td th:text="${order?.month}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+</body>
+<script type="text/javascript">
+    layui.use(['element'], function () {
+        var element = layui.element;
+    })
+</script>
+</html>

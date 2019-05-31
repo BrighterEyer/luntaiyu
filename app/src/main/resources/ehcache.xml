@@ -1,0 +1,19 @@
+<ehcache>
+    <diskStore path = "/usr/local/java/hyt/Java.io.tmpdir"/>
+    <defaultCache eternal="false"
+        maxElementsInMemory="900"
+        overflowToDisk="false"
+        diskPersistent="false"
+        timeToIdleSeconds="0"
+        timeToLiveSeconds="60"
+        memoryStoreEvictionPolicy="LRU" />
+    <cache
+        name="SMS_CODE_CACHE"
+        eternal="false"
+        maxElementsInMemory="200"
+        overflowToDisk="true"
+        diskPersistent="false"
+        timeToIdleSeconds="300"
+        timeToLiveSeconds="300"
+        memoryStoreEvictionPolicy="LRU" />
+</ehcache>

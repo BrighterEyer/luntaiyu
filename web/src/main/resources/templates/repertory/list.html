@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>库存查询</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <div class="demoTable">
+                搜索：
+                <div class="layui-inline">
+                    <input class="layui-input" name="name" id="name" placeholder="商品名称" autocomplete="off">
+                </div>
+                <button class="layui-btn layui-bg-red" data-type="reload">搜索</button>
+            </div>
+            <table class="layui-hide" id="baseInfo" lay-filter="demo"></table>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">改库存</a>
+    <a class="layui-btn layui-btn-xs" lay-event="out">出库</a>
+</script>
+<script type="text/javascript">
+    layui.use(['element', 'table', 'form'], function () {
+        var element = layui.element, table = layui.table, form = layui.form;
+        // 列表
+        table.render({
+            elem: '#baseInfo'
+            , url: '/web/OutDelivery/repertory/list'
+            , page: true
+            , cellMinWidth: 80
+            , id: 'idbaseInfo'
+            , page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next']
+                , curr: 1
+                , limit: 10
+                , group: 5
+            }
+            , response: {
+                statusName: 'code'
+                , statusCode: '200'
+                , countName: 'total'
+                , dataName: 'data'
+            }
+            , cols: [
+                [
+                    {field: 'id', title: 'ID', align: 'center'}
+                    , {field: 'name', title: '名称', align: 'center'}
+                    , {field: 'viceName', title: '副名称', align: 'center'}
+                    , {field: 'inventory', title: '库存', align: 'center'}
+                    , {field: 'delivery', title: '出库总数', align: 'center'}
+
+                    , {
+                    field: 'createTime', title: "创建时间", align: 'center', templet: function (data) {
+                        return createTime(data.createTime)
+                    }
+                }
+                    , {field: 'right', title: '操作', toolbar: "#barDemo", align: 'center'}
+                ]
+
+            ]
+
+        });
+        form.render()
+        // 监听表格复选框选择
+        table.on('checkbox(demo)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {//修改库存
+                layer.open({
+                    type: 1 //此处以iframe举例
+                    , title: '基本信息'
+                    , area: ['400px', '200px']
+                    , id: 'LAY_auth'
+                    , shade: 0.3
+                    , shadeClose: true
+                    , anim: 3
+                    , btnAlign: 'c' //居中对齐
+                    , moveType: 1 //拖拽模式，0或者1
+                    , content: '<form class="layui-form" action="" style="padding-top: 15px;">' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label"></label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" style="display:none" name="id" value="' + data.id + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">商品库存</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="inventory" value="' + data.inventory + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<div class="layui-input-block">' +
+                    '<button class="layui-btn" lay-submit lay-filter="update">保存</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
+                });
+                form.render()
+            }
+            else {
+                layer.msg('更改失败')
+            }
+        });
+        form.on('submit(update)', function (data) {
+            var auth = $(this).parents('form').find('input[type=checkbox]'), data = data.field, role = [];
+            auth.each(function (i, o) {
+                if ($(o).prop('checked')) {
+                    role.push($(o).val())
+                }
+            })
+            data.auths = role
+            var index = layer.msg('更改中，请稍候...', {icon: 16, time: false, shade: 0});
+            setTimeout(function () {
+                jQuery.ajaxSettings.traditional = true;
+                $.post('/web/OutDelivery/repertory/update', data, function (data) {
+                    if (data.code == '200') {
+                        table.reload('idbaseInfo');
+                        layer.msg('更改成功')
+                    } else {
+                        layer.msg('更改失败')
+                    }
+                }, 'json')
+            }, 500);
+            layer.closeAll();
+            return false;
+        });
+
+        var $ = layui.$, active = {
+            reload: function () {
+                var index = layer.msg('查询中，请稍候...', {icon: 16, time: false, shade: 0});
+                setTimeout(function () {
+                    //执行重载
+                    table.reload('idbaseInfo', {
+                        page: {
+                            curr: 1
+                        },
+                        where: {
+                            name: $('#name').val(),
+                        }
+                    });
+                    layer.close(index);
+                }, 800);
+            }
+        };
+        $('.demoTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+</body>
+</html>

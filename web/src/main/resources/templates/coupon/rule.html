@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>规则设置</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <div class="layui-btn-group layui-icon">
+                <button class="layui-btn" id="addTable">添加</button>
+            </div>
+            <table class="layui-hide" id="baseInfo" lay-filter="demo"></table>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/javascript">
+    layui.use(['element', 'table', 'form'], function () {
+        var element = layui.element, table = layui.table, form = layui.form;
+        // 列表
+        table.render({
+            elem: '#baseInfo'
+            , url: '/web/coupon/list'
+            , page: true
+            , cellMinWidth: 80
+            , id: 'idbaseinfo'
+            , page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next']
+                , curr: 1
+                , limit: 10
+                , group: 5
+            }
+            , response: {
+                statusName: 'code'
+                , statusCode: '200'
+                , countName: 'total'
+                , dataName: 'data'
+            }
+            , cols: [
+                [
+                    {field: 'id', title: 'ID', align: 'center'}
+                    , {field: 'name', title: '名称', align: 'center'}
+                    , {
+                    field: 'type', title: '类型', align: 'center', templet: function (data) {
+                        if (data.type.toString() === '1') {
+                            return '优惠卷';
+                        } else if (data.type.toString() === '2') {
+                            return '代金卷'
+                        }
+                    }
+
+                }
+                    ,
+                    {field: 'price', title: '金额', align: 'center'}
+                    ,
+                    {
+                        field: 'endTime', title: '到期时间', align: 'center', templet: function (data) {
+                            return createTime(data.endTime)
+
+                        }
+                    }
+                    ,
+                    {field: 'goodId', title: '指定商品ID', align: 'center'}
+                    ,
+                    {field: 'userId', title: '指定用户ID', align: 'center'}
+                    ,
+                    {
+                        field: 'status', title: '状态', align: 'center', templet: function (data) {
+                            if (data.status.toString() === '0') {
+                                return "未使用"
+                            } else if (data.status.toString() === '1') {
+                                return "已使用"
+                            } else if (data.status.toString() === '2') {
+                                return "已过期"
+                            }
+                        }
+                    }
+                    ,
+                    {
+                        field: 'createTime', title: "创建时间", align: 'center', templet: function (data) {
+                            return createTime(data.createTime)
+                        }
+                    }
+                    , {field: 'right', title: '操作', toolbar: "#barDemo", align: 'center'}
+                ]
+
+            ]
+
+        });
+        form.render()
+        // 监听表格复选框选择
+        table.on('checkbox(demo)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {//删除优惠卷
+                layer.confirm('真的删除么?', {
+                    skin: 'layui-layer-lan',
+                    anim: 1,
+                    shadeClose: true,
+                    icon: 5,
+                    title: '提示'
+                }, function (index) {
+                    $.post('/web/coupon/del', {id: data.id}, function (data) {
+                        if (data.code == '200') {
+                            layer.msg('删除成功')
+                            obj.del();
+                            layer.close(index);
+                        } else {
+                            layer.msg('删除失败')
+                        }
+                    }, 'json')
+                });
+                form.render()
+            }
+            else if (obj.event === 'edit') {//修改优惠卷
+                layer.open({
+                    type: 1 //此处以iframe举例
+                    , title: '基本信息'
+                    , area: ['500px', '450px']
+                    , id: 'LAY_auth'
+                    , shade: 0.3
+                    , shadeClose: true
+                    , anim: 3
+                    , btnAlign: 'c' //居中对齐
+                    , moveType: 1 //拖拽模式，0或者1
+                    , content: '<form class="layui-form" action="" style="padding-top: 15px;">' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label"></label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" style="display:none" name="id" value="' + data.id + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">名称</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="name" value="' + data.name + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">类型</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="type" value="' + data.type + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">金额</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="price" value="' + data.price + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">到期时间</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="endTime" value="' + createTime(data.endTime) + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">指定商品ID</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="goodId" value="' + data.goodId + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">指定用户ID</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="userId" value="' + data.userId + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">状态</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="status" value="' + data.status + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<div class="layui-input-block">' +
+                    '<button class="layui-btn" lay-submit lay-filter="updateCoupon">保存</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
+                });
+                form.render()
+            } else {
+                layer.msg('更新失败')
+            }
+        });
+        form.render()
+
+        //添加
+        $("#addTable").click(function () {
+            layer.open({
+                type: 1
+                , title: '添加优惠券' //不显示标题栏
+                , area: ['350px', '450px']
+                , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                , shade: 0.3
+                , anim: 1
+                , shadeClose: true
+                , btnAlign: 'c' //居中对齐
+                , moveType: 1 //拖拽模式，0或者1
+                , content: '<form class="layui-form" action="" style="padding-top: 30px;">' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">名称:</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="name" required lay-verify="required" placeholder=" *元优惠卷 " autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">类型:</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="type" required lay-verify="required" placeholder="1优惠卷 2代金券 " autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">金额:</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="price" required lay-verify="required" placeholder=" * " autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item"  >' +
+                '<label class = "layui-form-label"> 到期时间:</label>' +
+                '<div class = "layui-input-inline">' +
+                '<input type = "text" name="endTime" required lay-verify="required"  placeholder="yyyy-MM-dd HH:mm:ss" class="layui-input" >' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">指定商品ID:</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="goodId" required lay-verify="required" placeholder="请输入商品ID" autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item">' +
+                '<label class="layui-form-label" >指定用户ID:</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="userId" required lay-verify="required" placeholder="请输入用户ID" autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<div class="layui-input-block">' +
+                '<button class="layui-btn" lay-submit lay-filter="addCoupon">保存</button>' +
+                '</div>' +
+                '</div>' +
+                '</form>'
+            });
+            form.render()
+        });
+        form.render()
+        //添加
+        form.on('submit(addCoupon)', function (data) {
+            oldData = table.cache["idbaseinfo"];
+            var data = data.field;
+            var index = layer.msg('正在添加优惠劵/代金券...', {icon: 16, time: false, shade: 0});
+            setTimeout(function (index) {
+                $.post('/web/coupon/save', data, function (data) {
+                    if (data.code == '200') {
+                        layer.msg('添加成功')
+                        data1 = {
+                            "id": data.data.id,
+                            "name": data.data.name,
+                            "type": data.data.type,
+                            "price": data.data.price,
+                            "endTime": data.data.endTime,
+                            "goodId": data.data.goodId,
+                            "status": data.data.status,
+                            "createTime": data.data.createTime,
+                            "userId": data.data.userId
+                        };
+                        oldData.push(data1);
+                        table.reload('idbaseinfo', {
+                            data: oldData
+                        });
+                    } else {
+                        layer.msg(data.msg)
+                    }
+                }, 'json')
+            }, 500);
+            layer.close(index);
+            layer.closeAll();
+            return false;
+        });
+        form.render()
+        // 更新
+        form.on('submit(updateCoupon)', function (data) {
+            var auth = $(this).parents('form').find('input[type=checkbox]'), data = data.field, role = [];
+            auth.each(function (i, o) {
+                if ($(o).prop('checked')) {
+                    role.push($(o).val())
+                }
+            })
+            data.auths = role
+            var index = layer.msg('更改中，请稍候...', {icon: 16, time: false, shade: 0});
+            setTimeout(function () {
+                jQuery.ajaxSettings.traditional = true;
+                $.post('/web/coupon/update', data, function (data) {
+                    if (data.code == '200') {
+                        layer.msg('更新成功')
+                        table.reload('idbaseinfo');
+                    } else {
+                        layer.msg('更新失败')
+                    }
+                }, 'json')
+            }, 500);
+            layer.closeAll();
+            return false;
+        });
+        form.render()
+    });
+
+    function createTime(v) {
+        var date = new Date(v);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? '0' + m : m;
+        var d = date.getDate();
+        d = d < 10 ? ("0" + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ("0" + h) : h;
+        var M = date.getMinutes();
+        M = M < 10 ? ("0" + M) : M;
+        var s = date.getSeconds();
+        s = s < 10 ? ("0" + s) : s;
+        var str = y + "-" + m + "-" + d + " " + h + ":" + M + ":" + s;
+        return str;
+    }
+</script>
+</body>
+</html>

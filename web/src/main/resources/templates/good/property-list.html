@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>商品属性列表</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <button><a class="layui-btn add">添加</a></button>
+            <table class="layui-hide" id="baseInfo" lay-filter="demo"></table>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/javascript">
+    layui.use(['element','table','form','upload'], function(){
+        var table = layui.table,form=layer.form;
+        table.render({
+            elem: '#baseInfo'
+            , url: '/web/goodsCommodity/find/property/s/list'
+            , page: true //开启分页
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , id: 'idbaseInfo'
+            , page: { //分页设定
+                layout: ['count', 'prev', 'page', 'next'] //自定义分页布局
+                , curr: 1 //设定初始在第 1 页
+                , limit: 10//每页多少数据
+                , groups: 5 //只显示 5 个连续页码
+            }
+            , response: {
+                statusName: 'code' //数据状态的字段名称，默认：code
+                , statusCode: '200' //成功的状态码，默认：0
+                , countName: 'total'
+                , dataName: 'data' //数据列表的字段名称，默认：data
+            }
+            , cols: [
+                [
+                    {field: 'id', title: 'ID', align: 'center'}
+                    , {field: 'name', title: '名称', align: 'center'}
+                    , {field: 'val', title: '值', align: 'center'}
+                    , {field: 'parentId', title: '类型', align: 'center', templet: function (data) {
+                        if (data.parentId===0) {
+                            return "父类";
+                        }else if (data.parentId>0) {
+                            return "子类";
+                        }
+                    }}
+                    , {field: 'right', title: '操作', toolbar: "#barDemo", align: 'center'}
+                ]
+            ]
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(demo)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                layer.confirm('删除该属性，子类也将被删除？', {
+                    skin: 'layui-layer-lan',
+                    anim: 1,
+                    shadeClose: true,
+                    icon: 5,
+                    title: '提示'
+                }, function (index) {
+                    $.post('/web/goodsCommodity/property/del/s/id', {id: data.id}, function (data) {
+                        if (data.code == '200') {
+                            obj.del();
+                            layer.msg('删除成功', {time: 300, shade: 0.3, shadeClose: true});
+                        } else {
+                            layer.msg('删除失败，有商品持有该属性')
+                        }
+                    }, 'json')
+                    layer.close(index);
+                });
+            }else if (obj.event === 'edit') {
+                layer.open({
+                    type: 1 //此处以iframe举例
+                    , title: '属性详情'
+                    , area: ['400px', '330px']
+                    , id: 'LAY_auth'
+                    , shadeClose: true
+                    , anim: 3
+                    , btnAlign: 'c' //居中对齐
+                    , moveType: 1 //拖拽模式，0或者1
+                    , content: '<form class="layui-form" action="" style="padding-top: 15px;">' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">id</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="id" value="' + data.id + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">名称</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="name" value="' + data.name + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">值</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="val" value="' + data.val + '" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">父级</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="parentId" value="' + data.parentId + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
+                    ,btn: ['提交', '关闭']
+                    , yes: function (index,data) {
+                        $.post('/web/goodsCommodity/find/property/s/save',$(data).find("form").serializeObject(),function (date) {
+                            if (date.code === '200') {
+                                layer.msg('保存成功', {time: 500, shade: 0.3, shadeClose: true});
+                                table.reload('idbaseInfo', {
+                                    page: {
+                                        curr: 1
+                                    }
+                                });
+                            } else {
+                                layer.msg('保存失败')
+                            }
+                        },'json')
+                        layer.close(index);
+                    }
+                });
+            }
+        });
+        $('.add').click(function(){
+            var str='';
+            $.get('/web/goodsCommodity/find/property/s/list',{pageSize:100,type:0},function (data) {
+                if (data.code==='200'){
+                    $.each(data.data,function () {
+                        str+='<option value="'+this.id+'">'+this.name+'</option>';
+                    })
+                    layer.open({
+                        type: 1 //此处以iframe举例
+                        , title: '添加属性'
+                        , area: ['400px', '500px']
+                        , id: 'LAY_auth'
+                        , shadeClose: true
+                        , anim: 3
+                        , btnAlign: 'c' //居中对齐
+                        , moveType: 1 //拖拽模式，0或者1
+                        , content: '<form class="layui-form" action="" style="padding-top: 15px;">' +
+                        '<div class="layui-form-item">' +
+                        '<label class="layui-form-label">名称</label>' +
+                        '<div class="layui-input-inline">' +
+                        '<input type="text" name="name" value="" autocomplete="off" class="layui-input">' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="layui-form-item">' +
+                        '<label class="layui-form-label">值</label>' +
+                        '<div class="layui-input-inline">' +
+                        '<input type="text" name="val" value="" autocomplete="off" class="layui-input">' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="layui-form-item">' +
+                        '<label class="layui-form-label">父级</label>' +
+                        '<div class="layui-input-inline">' +
+                        '<select name="parentId">'+
+                        '<option value="0">父级选择</option>'+str+
+                        '</select>'+
+                        '</div>' +
+                        '</div>' +
+                        '</form>'
+                        ,btn: ['提交', '关闭']
+                        , yes: function (index,data) {
+                            var dataFrom=$(data).find("form").serializeObject();
+                            console.info(dataFrom)
+                            if ((+dataFrom.parentId===0 && dataFrom.name!=='') || dataFrom.parentId>0 && dataFrom.val!==''){
+                                $.post('/web/goodsCommodity/find/property/s/save',dataFrom,function (date) {
+                                    if (date.code === '200') {
+                                        layer.msg('保存成功', {icon: 16, time: 500, shade: 0.3, shadeClose: true});
+                                        table.reload('idbaseInfo', {
+                                            page: {
+                                                curr: 1
+                                            }
+                                        });
+                                    } else {
+                                        layer.msg('保存失败')
+                                    }
+                                },'json')
+                                layer.close(index);
+                            }else {
+                                layer.msg('名称/值不能为空')
+                            }
+                        }
+                    });
+                    renderForm()
+                }
+            },'json')
+        });
+        function renderForm(){
+            layui.use('form', function(){
+                var form = layui.form
+                form.render();
+            });
+        }
+    });
+
+</script>
+</body>
+</html>

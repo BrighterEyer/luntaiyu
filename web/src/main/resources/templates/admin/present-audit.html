@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>提现审核</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <div class="demoTable">
+                搜索：
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select name="status" lay-verify="required" lay-search="" id="status">
+                            <option value="">状态搜索</option>
+                            <option value="2">通过</option>
+                            <option value="1">没通过</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="layui-btn" data-type="reload">搜索</button>
+                <div class="layui-inline">
+                    <input class="layui-input" name="threshold" onblur="threshold(this)" placeholder="提现门槛"
+                           autocomplete="off">
+                </div>
+            </div>
+            <table class="layui-hide" id="baseInfo" lay-filter="demo"></table>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    {{# if(d.status==2){}}
+    通过
+    {{# }else if(d.status==1){}}
+    不通过
+    {{# }else if(d.status==0){}}
+    <a class="layui-btn layui-btn-xs" lay-event="edit">通过</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">不通过</a>
+    {{# }}}
+</script>
+<script type="text/javascript">
+    layui.use(['element','table','form'], function(){
+        var element = layui.element,table = layui.table,form = layui.form;
+        table.render({
+            elem: '#baseInfo'
+            , url: '/web/transactionrecord/examine/transactionrecord/list'
+            , page: true //开启分页
+            , cellMinWidth: 80  //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , page: { //分页设定
+                layout: ['count', 'prev', 'page', 'next'] //自定义分页布局
+                , curr: 1 //设定初始在第 1 页
+                , limit: 10//每页多少数据
+                , groups: 5 //只显示 5 个连续页码
+            }
+            , id: 'idbaseInfo'
+            , response: {
+                statusName: 'code' //数据状态的字段名称，默认：code
+                , statusCode: '1' //成功的状态码，默认：0
+                , countName: 'total'
+                , dataName: 'data' //数据列表的字段名称，默认：data
+            }
+            , cols: [
+                [
+                    {field: 'official', title: '平台方', align: 'center'}
+                    , {field: 'accountType', title: '账号类型', align: 'center'}
+                    , {field: 'account', title: '银行卡账号', align: 'center'}
+                    , {field: 'name', title: '银行卡用户', align: 'center'}
+                    , {
+                    field: 'transactionMode', title: '交易方式', align: 'center', templet: function (data) {
+                        if (data.transactionMode === 1) {
+                            return '提现';
+                        } else if (data.transactionMode === 2) {
+                            return '收入';
+                        } else if (data.transactionMode === 3) {
+                            return '信息费支出';
+                        }
+                    }
+                }
+                    , {field: 'money', title: '金额', align: 'center'}
+                    , {field: 'userName', title: '交易方', align: 'center'}
+                    , {
+                    field: 'tradingTime', title: '注册时间', align: 'center', templet: function (data) {
+                        return createTime(data.tradingTime)
+                    }
+                }
+                    , {field: 'right', title: '操作', toolbar: "#barDemo", align: 'center'}
+                ]
+            ]
+        });
+
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.open({
+                    type: 1 //此处以iframe举例
+                    , title: '提现信息'
+                    , area: ['390px', '400px']
+                    , shade: 0.3
+                    , anim: 2
+                    , shadeClose: true
+                    , btnAlign: 'c' //居中对齐
+                    , moveType: 1 //拖拽模式，0或者1
+                    , content: '<form class="layui-form" action="" style="padding-top: 15px;">' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">申请人</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + data.userName + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">申请时间</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + createTime(data.tradingTime) + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">申请金额</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + data.money + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">转入账号</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + data.account + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">转入账号名</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + data.name + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
+                    , btn: ['关闭'] //只是为了演示
+                    , yes: function () {
+                        layer.closeAll();
+                    }
+                });
+            } else if (obj.event === 'edit') {
+                layer.confirm('确定通过么', {
+                    skin: 'layui-layer-molv',
+                    anim: 1,
+                    shadeClose: true,
+                    icon: 1,
+                    title: '提示'
+                }, function (index) {
+                    $.post('/web/transactionrecord/transactionrecord/examine/id', {
+                        id: data.id,
+                        type: 2
+                    }, function (date) {
+                        if (date.code == '1') {
+                            obj.del();
+                            layer.close(index);
+                        } else {
+                            layer.msg('操作失败')
+                        }
+                    }, 'json')
+                });
+            } else if (obj.event === 'del') {
+                layer.confirm('真的不通过么', {
+                    skin: 'layui-layer-lan',
+                    anim: 3,
+                    shadeClose: true,
+                    icon: 3,
+                    title: '提示'
+                }, function (index) {
+                    $.post('/web/transactionrecord/transactionrecord/examine/id', {
+                        id: data.id,
+                        type: 1
+                    }, function (date) {
+                        if (date.code == '1') {
+                            obj.del();
+                            layer.close(index);
+                        } else {
+                            layer.msg('操作失败')
+                        }
+                    }, 'json')
+                });
+            }
+        });
+
+        var $ = layui.$, active = {
+            reload: function () {
+                var status = $('#status').val();
+                var index = layer.msg('查询中，请稍候...', {icon: 16, time: false, shade: 0});
+                setTimeout(function () {
+                    //执行重载
+                    table.reload('idbaseInfo', {
+                        page: {
+                            curr: 1
+                        },
+                        where: {
+                            status: status
+                        }
+                    });
+                    layer.close(index);
+                }, 400);
+            }
+        };
+        $('.demoTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+function threshold(thiz) {
+    $.post("/web/wallet/threshold/all", {threshold: $(thiz).val()}, function (data) {
+        if (data.code == '1') {
+            layer.msg('修改成功')
+        } else {
+            layer.msg('操作失败')
+        }
+    }, "json")
+}
+
+</script>
+</body>
+</html>

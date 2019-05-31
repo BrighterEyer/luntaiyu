@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>轮播图修改</title>
+    <script charset="utf-8" src="/js/kindeditor-all.js"></script>
+    <script charset="utf-8" src="/js/zh-CN.js"></script>
+    <link rel="stylesheet" href="/css/default.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">上传图片</label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" id="upload">
+                            <i class="layui-icon">&#xe67c;</i>上传图片
+                        </button>
+                        <div class="layui-upload-list">
+                            <input name="id" type="hidden" th:value="${data?.id}">
+                            <input name="imgUrl" type="hidden" th:value="${data?.imgUrl}">
+                            <img class="layui-upload-img" height="200" width="300" th:src="${data?.imgUrl}">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">跳转地址</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="imgJump" th:value="${data?.imgJump}" lay-verify="title"
+                               autocomplete="off" placeholder="请输入跳转地址"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">标题</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" th:value="${data?.name}" lay-verify="title"
+                               autocomplete="off" placeholder="请输入标题"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="type" value="1" title="首页" th:checked="${data?.type eq 1 || data==null}">
+                        <input type="radio" name="type" value="2" title="活动图" th:checked="${data?.type eq 2}">
+                    </div>
+                </div>
+                <!--<div class="layui-form-item">-->
+                    <!--<div class="layui-input-block">-->
+                        <!--<textarea name="textDetails" style="width:1551px;height:400px;visibility:hidden;display: block;"-->
+                                  <!--th:text="${data?.data?.textDetails}"></textarea>-->
+                        <!--<p>-->
+                            <!--<input type="button" id="clean" value="清空内容"/>-->
+                        <!--</p>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="imgSave">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script>
+    var editor;
+    // $(function () {
+    //     KindEditor.ready(function (K) {
+    //         editor = K.create('textarea[name="textDetails"]', {
+    //             //allowFileManager : true
+    //             items: ["source", "formatblock", "fontname", "fontsize", "forecolor", "hilitecolor", "bold", "italic", "underline", "strikethrough", "justifyleft", "justifycenter", "image", "multiimage"]
+    //         });
+    //         K('input[id=clean]').click(function (e) {
+    //             editor.html('');
+    //         });
+    //     });
+    // })
+    layui.use(['form', 'upload', 'layedit'], function () {
+        var form = layui.form, upload = layui.upload;
+        //执行实例
+        var uploadInst = upload.render({
+            elem: '#upload' //绑定元素
+            , url: '/web/slideshowimg/img/s/upload' //上传接口
+            , number: 1
+            , done: function (res, index, upload) {//响应  文件的索引  重新上传的方法
+                $('img').show().attr('src', res[0])
+                $('input[name="imgUrl"]').val(res[0])
+                //上传完毕回调
+            }
+            , error: function (index, upload) {
+                //请求异常回调
+            }
+        });
+
+        form.on('submit(imgSave)', function (data) {
+            var data = data.field;
+            delete data.file;
+            // data.textDetails = editor.html();
+            var index = layer.msg('正在保存信息，请稍候...', {icon: 16, time: false, shade: 0});
+            setTimeout(function () {
+                $.post('/web/slideshowimg/slideshowimg/save/s/id', data, function (data) {
+                    if (data.code == '200') {
+                        layer.msg('保持成功', {icon: 6, time: 1000, shade: 0}, function () {
+                            location.href = '/web/slideshowimg/find/slideshowimg/s/view';
+                        })
+                    } else {
+                        layer.msg(data.msg, {icon: 5, time: 800, shade: 0})
+                    }
+                }, 'json')
+            }, 500);
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>出库</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <div class="layui-btn-group layui-icon">
+                <button class="layui-btn" id="addTable">出库</button>
+            </div>
+            <table class="layui-hide" id="baseInfo" lay-filter="demo"></table>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script type="text/javascript">
+    layui.use(['element', 'table', 'form'], function () {
+        var element = layui.element, table = layui.table, form = layui.form;
+        // 列表
+        table.render({
+            elem: '#baseInfo'
+            , url: '/web/OutDelivery/list'
+            , page: true
+            , cellMinWidth: 80
+            , id: 'idbaseInfo'
+            , page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next']
+                , curr: 1
+                , limit: 10
+                , group: 5
+            }
+            , response: {
+                statusName: 'code'
+                , statusCode: '200'
+                , countName: 'total'
+                , dataName: 'data'
+            }
+            , cols: [
+                [
+                    {field: 'id', title: 'ID', align: 'center'}
+                    , {field: 'goodId', title: '指定出库商品ID', align: 'center'}
+                    , {field: 'tyreNumber', title: '轮胎编号', align: 'center'}
+                    , {field: 'deliveryCount', title: '出库数量', align: 'center'}
+                    , {field: 'deliveryCause', title: '出库原因', align: 'center'}
+                    , {
+                    field: 'deliveryDetail', title: '出库明细', align: 'center', templet: function (d) {
+                        if (d.deliveryDetail === 1) {
+                            return '平台出库'
+                        } else if (d.deliveryDetail === 2) {
+                            return '手动出库'
+                        }
+                    }
+                }
+                    , {
+                    field: 'createTime', title: "创建时间", align: 'center', templet: function (data) {
+                        return createTime(data.createTime)
+                    }
+                }
+                ]
+
+            ]
+
+        });
+        form.render()
+        // 监听表格复选框选择
+        table.on('checkbox(demo)', function (obj) {
+            console.log(obj)
+        });
+        //添加
+        $("#addTable").click(function () {
+            layer.open({
+                type: 1
+                , title: '出库' //不显示标题栏
+                , area: ['400px', '480px']
+                , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                , shade: 0.3
+                , anim: 1
+                , shadeClose: true
+                , btnAlign: 'c' //居中对齐
+                , moveType: 1 //拖拽模式，0或者1
+                , content: '<form class="layui-form" action="" style="padding-top: 30px;">' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">商品ID</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="goodId" required lay-verify="required" placeholder="请输入商品ID" autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">轮胎编号</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<textarea style="height: 100px" name="tyreNumber" required lay-verify="required" placeholder="多个编号请用逗号隔开.." autocomplete="off" class="layui-input">' + '</textarea>' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">出库数量</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="deliveryCount" required lay-verify="required" placeholder=" " autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">出库原因</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="deliveryCause" required lay-verify="required" placeholder=" " autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<label class="layui-form-label">出库明细</label>' +
+                '<div class="layui-input-inline"> ' +
+                '<input type="text" name="deliveryDetail" required lay-verify="required" placeholder=" 1-平台2-手动 " autocomplete="off" class="layui-input">' +
+                '</div>' +
+                '</div>' +
+                '<div class="layui-form-item" >' +
+                '<div class="layui-input-block">' +
+                '<button class="layui-btn" lay-submit lay-filter="out">出库</button>' +
+                '</div>' +
+                '</div>' +
+                '</form>'
+            });
+            form.render()
+        });
+
+        form.on('submit(out)', function (data) {
+            oldData = table.cache["idbaseInfo"];
+            var data = data.field;
+            var index = layer.msg('正在出库...', {icon: 16, time: false, shade: 0});
+            setTimeout(function (index) {
+                $.post('/web/OutDelivery/out', data, function (data) {
+                    if (data.code == '200') {
+                        layer.msg('出库成功')
+                        data1 = {
+                            "goodId":
+                            data.data.goodId,
+                            "tyreNumber":
+                            data.data.tyreNumber,
+                            "deliveryCount":
+                            data.data.deliveryCount,
+                            "deliveryCause":
+                            data.data.deliveryCause,
+                            "deliveryDetail":
+                            data.data.deliveryDetail
+                        }
+                        ;
+                        oldData.push(data1);
+                        table.reload('idbaseInfo', {
+                            data: oldData
+                        });
+                    } else {
+                        layer.msg(data.msg)
+                    }
+                }, 'json')
+            }, 500);
+            layer.close(index);
+            layer.closeAll();
+            return false;
+        });
+        form.render()
+    });
+</script>
+</body>
+</html>

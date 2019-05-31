@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>商品分类修改</title>
+    <!--<script charset="utf-8" src="/js/zh-CN.js"></script>-->
+    <link rel="stylesheet" href="/css/default.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" lay-filter="erweima" name="type" value="1" title="父类" th:checked="${data?.fuClassId eq 0 || data==null}">
+                        <input type="radio" lay-filter="erweima" name="type" value="2" title="子类" th:checked="${data?.fuClassId gt 0}">
+                    </div>
+                </div>
+                <div class="layui-form-item erweima"
+                     th:class="${data?.fuClassId eq 0 || data eq null}?'layui-hide erweima':'layui-form-item erweima'">
+                    <label class="layui-form-label">父类选择</label>
+                    <div class="layui-input-block">
+                        <select name="fuClassId" lay-verify="required">
+                            <option value="0"></option>
+                            <option th:each="category:${categorys?.data}" th:selected="${data?.fuClassId eq category?.id}"
+                                    th:value="${category?.id}" th:text="${category?.name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" th:value="${data?.name}" lay-verify="title"
+                               autocomplete="off" placeholder="请输入标题"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item erweimg"
+                     th:class="${data?.fuClassId eq 0 || data eq null}?'layui-form-item erweimg':'layui-hide erweimg'">
+                    <label class="layui-form-label">上传图片</label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" id="upload">
+                            <i class="layui-icon">&#xe67c;</i>上传图片
+                        </button>
+                        <div class="layui-upload-list">
+                            <input name="id" type="hidden" th:value="${data?.id}">
+                            <input name="img" type="hidden" th:value="${data?.img}">
+                            <img class="layui-upload-img" height="200" width="300" th:src="${data?.img}">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="imgSave">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script>
+    layui.use(['form', 'upload', 'layedit'], function () {
+        var form = layui.form, upload = layui.upload;
+        //执行实例
+        var uploadInst = upload.render({
+            elem: '#upload' //绑定元素
+            , url: '/web/slideshowimg/img/s/upload' //上传接口
+            , number: 1
+            , done: function (res, index, upload) {//响应  文件的索引  重新上传的方法
+                $('img').show().attr('src', res[0])
+                $('input[name="img"]').val(res[0])
+                //上传完毕回调
+            }
+            , error: function (index, upload) {
+                //请求异常回调
+            }
+        });
+
+        form.on('submit(imgSave)', function (data) {
+            var data = data.field;
+            delete data.file;
+            if (+data.type===2){
+                data.img='';
+                if (+data.fuClassId===0){
+                    layer.msg('请选择父类', {icon: 5, time: 1000, shade: 0})
+                    return false;
+                }
+            }else {
+                data.fuClassId=0;
+            }
+            var index = layer.msg('正在保存信息，请稍候...', {icon: 16, time: false, shade: 0});
+            setTimeout(function () {
+                $.post('/web/goodsClassification/category/save/s/id', data, function (data) {
+                    if (data.code == '200') {
+                        layer.msg('保持成功', {icon: 6, time: 1000, shade: 0}, function () {
+                            location.href = '/web/goodsClassification/find/category/s/view';
+                        })
+                    } else {
+                        layer.msg(data.msg, {icon: 5, time: 800, shade: 0})
+                    }
+                }, 'json')
+            }, 500);
+            return false;
+        });
+
+        form.on('radio(erweima)', function (data) {
+            if (+data.value===1){
+                $(".erweima").addClass("layui-hide");
+                $(".erweimg").removeClass('layui-hide');
+            } else if (+data.value===2){
+                $(".erweima").removeClass('layui-hide');
+                $(".erweimg").addClass("layui-hide");
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

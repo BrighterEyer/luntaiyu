@@ -1,0 +1,253 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<div id="app">
+    <div class="layui-header">
+        <div class="layui-logo">后台管理</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <!--<ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">控制台</a></li>
+            <li class="layui-nav-item"><a href="">商品管理</a></li>
+            <li class="layui-nav-item"><a href="">用户</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">邮件管理</a></dd>
+                    <dd><a href="">消息管理</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+        </ul>-->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="" class="layui-nav-img">
+                    <span sec:authentication="principal.icon" id="icon" hidden></span>
+                    <span sec:authentication="name"></span>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="javascript:;" data-method="notice" class="layui-btn">修改密码</a></dd>
+                    <!--<dd><a href="">安全设置</a></dd>-->
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="/web/admin/s/logout">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_ACCOUNT')">
+                    <a href="/web/admin/children/admin/s/view"
+                       th:class="${url eq '/web/admin/children/admin/s/view'}?'layui-this':''">账户管理</a>
+                    <!--<dl class="layui-nav-child">
+                      <dd><a href="/web/admin/children/admin/view">子账户列表</a></dd>
+                    </dl>-->
+                </li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_GOOD')"
+                    th:class="${#strings.startsWith(url,'/web/goods')}?'layui-nav-item layui-nav-itemed':'layui-nav-item'">
+                    <a href="javascript:;">商品管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/web/goodsClassification/find/category/s/view"
+                               th:class="${url eq '/web/goodsClassification/find/category/s/view'}?'layui-this':''">
+                            分类列表</a></dd>
+                        <dd><a href="/web/goodsCommodity/find/goodsCommodity/s/view"
+                               th:class="${url eq '/web/goodsCommodity/find/goodsCommodity/s/view'}?'layui-this':''">商品列表
+                        </a></dd>
+                        <dd><a href="/web/goodsCommodity/find/property/s/view"
+                               th:class="${url eq '/web/goodsCommodity/find/property/s/view'}?'layui-this':''">属性列表</a>
+                        </dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_IMGS')"><a
+                        href="/web/slideshowimg/find/slideshowimg/s/view"
+                        th:class="${url eq '/web/slideshowimg/find/slideshowimg/s/view'}?'layui-this':''">轮播图管理</a></li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_ORDER')"><a
+                        href="/web/ordersupply/find/order/s/view"
+                        th:class="${url eq '/web/ordersupply/find/order/s/view'}?'layui-this':''">订单管理</a></li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_COUPON')"
+                    th:class="${#strings.startsWith(url, '/web/coupon')}?'layui-nav-item layui-nav-itemed':'layui-nav-item'">
+                    <a href="javascript:;">优惠券管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/web/coupon/find/view"
+                               th:class="${url eq '/web/coupon/find/view'}?'layui-this':''">优惠劵规则设置</a></dd>
+                        <dd><a href="/web/coupon/statistics/list"
+                               th:class="${url eq '/web/coupon/statistics/list'}?'layui-this':''">优惠卷统计</a>
+                        </dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_COUPON')"
+                    th:class="${#strings.startsWith(url, '/web/user')}?'layui-nav-item layui-nav-itemed':'layui-nav-item'">
+                    <a href="javascript:;">师傅管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/web/user/find/master/q/view"
+                               th:class="${url eq '/web/user/find/master/q/view'}?'layui-this':''">师傅信息管理</a></dd>
+                        <dd><a href="/web/user/find/set/q/view"
+                               th:class="${url eq '/web/user/find/set/q/view'}?'layui-this':''">安装/维修管理</a>
+                        </dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_COUPON')"
+                    th:class="${#strings.startsWith(url, '/web/OutDelivery')}?'layui-nav-item layui-nav-itemed':'layui-nav-item'">
+                    <a href="javascript:;">库存管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/web/OutDelivery/repertory/q/view"
+                               th:class="${url eq '/web/outinventory/repertory/q/view'}?'layui-this':''">库存查询</a>
+                        </dd>
+                        <dd><a href="/web/OutDelivery/repertory/q/outinventory"
+                               th:class="${url eq '/web/OutDelivery/repertory/q/outinventory'}?'layui-this':''">出库</a>
+                        </dd>
+                    </dl>
+                </li>
+                <!--<li class="layui-nav-item" sec:authorize="hasRole('ROLE_COUPON')"
+                    th:class="${#strings.startsWith(url, '/web/userCooperate')}?'layui-nav-item layui-nav-itemed':'layui-nav-item'">
+                    <a href="javascript:;">会员与积分体系管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/web/userCooperate/find/view"
+                               th:class="${url eq '/web/userCooperate/find/view'}?'layui-this':''">会员与积分体系设置</a>
+                        </dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_MESGERS')"><a
+                        href="/web/systemmessages/find/systemmessages/view"
+                        th:class="${url eq '/web/systemmessages/find/systemmessages/view'}?'layui-this':''">消息管理</a>
+                </li>-->
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_FINANCE')"
+                    th:class="${#strings.startsWith(url,'/web/user')}?'layui-nav-item layui-nav-itemed':'layui-nav-item'">
+                    <a href="javascript:;">财务管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/web/user/statistics/list"
+                               th:class="${url eq '/web/user/statistics/list'}?'layui-this':''">商家财务报表</a></dd>
+                    </dl>
+                </li>
+                <!--<li class="layui-nav-item" sec:authorize="hasRole('ROLE_COMPLAINT')"><a
+                        href="/web/complaints/find/all/view"
+                        th:class="${url eq '/web/complaints/find/all/view'}?'layui-this':''">
+                    意见反馈管理</a></li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_EVALUATE')"><a
+                        href="/web/companyprofile/find/all/view" class="aa"
+                        th:class="${url eq '/web/companyprofile/find/all/view'}?'layui-this':''">评价列表</a></li>
+                <li class="layui-nav-item" sec:authorize="hasRole('ROLE_CUSTOMER')"><a
+                        href="/web/companyprofile/find/all/view" class="aa"
+                        th:class="${url eq '/web/companyprofile/find/all/view'}?'layui-this':''">公司简介</a></li>
+                <li class="layui-nav-item"><a href="/web/versions/find/versions/view"
+                                              th:class="${url eq '/web/versions/find/versions/view'}?'layui-this':''">APP版本</a>
+                </li>-->
+            </ul>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery-2.1.1.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('#icon').prev('img').attr('src', $('#icon').text());
+    })
+</script>
+<script>
+    layui.use('form', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, form = layui.form, layer = layui.layer; //独立版的layer无需执行这一句
+        //触发事件
+        var active = {
+            notice: function () {
+                //示范一个公告层
+                layer.open({
+                    type: 1
+                    , title: '修改密码' //不显示标题栏
+                    , area: ['373px', '285px']
+                    , anim: 1
+                    , shadeClose: true
+                    , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                    , btnAlign: 'c' //居中对齐
+                    , moveType: 1 //拖拽模式，0或者1
+                    , content: '<form class="layui-form" action="" style="padding-top: 33px;">' +
+                    // '<div class="layui-form-item">'+
+                    //   '<label class="layui-form-label">旧密码</label>'+
+                    //   '<div class="layui-input-inline">'+
+                    //     '<input type="password" name="oldPassword" required  lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">'+
+                    //   '</div>'+
+                    // '</div>'+
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">新密码</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="password" name="newPassword1" required  lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">确认密码</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="password" name="newPassword2" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<div class="layui-input-block">' +
+                    '<button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>' +
+                    '<button type="reset" class="layui-btn layui-btn-primary">重置</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
+                });
+            }
+        };
+
+        $('.layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+        form.on('submit(formDemo)', function (data) {
+            var data = data.field;
+            if (data.newPassword1 === data.newPassword2) {
+                $.post('/web/admin/update/password/s/id', {
+                    oldPassword: data.oldPassword,
+                    newPassword: data.newPassword2
+                }, function (data) {
+                    if (data.code == '200') {
+                        layer.msg('修改成功')
+                        layer.closeAll();
+                    } else {
+                        layer.msg('修改失败')
+                    }
+                }, 'json')
+            } else {
+                layer.msg('两次密码不一样');
+            }
+            return false;
+        });
+    });
+
+    $.fn.serializeObject = function () {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function () {
+            if (o[this.name]) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    }
+
+    function createTime(v) {
+        var date = new Date(v);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? '0' + m : m;
+        var d = date.getDate();
+        d = d < 10 ? ("0" + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ("0" + h) : h;
+        var M = date.getMinutes();
+        M = M < 10 ? ("0" + M) : M;
+        var s = date.getSeconds();
+        s = s < 10 ? ("0" + s) : s;
+        var str = y + "-" + m + "-" + d + " " + h + ":" + M + ":" + s;
+        return str;
+    }
+</script>

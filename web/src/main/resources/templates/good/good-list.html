@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>商品列表</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <div class="demoTable">
+                搜索：
+                <div class="layui-inline">
+                    <input class="layui-input" name="name" id="name" placeholder="主副标题" autocomplete="off">
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select name="status" lay-verify="required" lay-search="" id="status">
+                            <option value="">正常/下架搜索</option>
+                            <option value="0">正常</option>
+                            <option value="1">下架</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="layui-btn layui-bg-red" data-type="reload">搜索</button>
+                <div class="layui-inline">
+                    <input class="layui-input" name="trading" placeholder="选择日期" id="trading"
+                           autocomplete="off">
+                </div>
+                <button class="layui-btn layui-bg-blue" data-type="report">导出</button>
+            </div>
+            <button><a class="layui-btn" href="/web/goodsCommodity/find/goodsCommodity/edit/s/view">添加</a></button>
+            <table class="layui-hide" id="baseInfo" lay-filter="demo"></table>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    {{# if(d.status==1){}}
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="black">上架</a>
+    {{# }else if(d.status==0){}}
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">下架</a>
+    <a class="layui-btn layui-btn-xs" href="/web/goodsCommodity/find/goodsCommodity/edit/s/view?id={{d.id}}">修改</a>
+    {{# }}}
+</script>
+<script type="text/javascript">
+    layui.use(['element', 'table', 'form','laydate'], function () {
+        var element = layui.element, table = layui.table, form = layui.form,laydate=layui.laydate;
+        laydate.render({
+            elem: '#trading' //指定元素
+            // ,type: 'datetime'
+            // ,format: 'yyyy-MM-dd HH:mm:ss'
+            , theme: '#89608C'
+            , calendar: true
+            , range: '～'
+        });
+        table.render({
+            elem: '#baseInfo'
+            , url: '/web/goodsCommodity/find/goodsCommodity/s/list'
+            , page: true //开启分页
+            , cellMinWidth: 80  //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , page: { //分页设定
+                layout: ['limit','count', 'prev', 'page', 'next'] //自定义分页布局
+                , curr: 1 //设定初始在第 1 页
+                , limit: 10//每页多少数据
+                , groups: 5 //只显示 5 个连续页码
+            }
+            , id: 'idbaseInfo'
+            , response: {
+                statusName: 'code' //数据状态的字段名称，默认：code
+                , statusCode: '200' //成功的状态码，默认：0
+                , countName: 'total'
+                , dataName: 'data' //数据列表的字段名称，默认：data
+            }
+            , cols: [
+                [
+                    {field: 'name', title: '标题', align: 'center'}
+                    , {field: 'viceName', title: '副标题', align: 'center'}
+                    , {field: 'img', title: '主图', align: 'center', templet: function (data) {
+                        return '<img src="'+data.img+'">';
+                    }}
+                    , {field: 'price', title: '价格', align: 'center'}
+                    , {field: 'promotionPrice', title: '促销价', align: 'center'}
+                    , {field: 'cooperatePrcie', title: '搭档价', align: 'center'}
+                    , {field: 'inventory', title: '库存', align: 'center'}
+                    , {field: 'noyesHotsell', title: '热销', align: 'center', width: 80, templet: function (d) {
+                        if (+d.noyesHotsell === 1) {
+                            return '是'
+                        } else if (+d.noyesHotsell === 0) {
+                            return '否'
+                        }
+                    }}
+                    , {
+                    field: 'status', title: '状态', align: 'center', templet: function (d) {
+                        if (d.status === 0) {
+                            return '正常'
+                        } else if (d.status === 1) {
+                            return '下架'
+                        }
+                    }
+                }
+                    , {
+                    field: 'createTime', title: '注册时间', align: 'center', templet: function (data) {
+                        return createTime(data.createTime)
+                    }
+                }
+                    , {field: 'right', title: '操作', toolbar: "#barDemo", align: 'center', width: 180}
+                ]
+            ]
+        });
+
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                var installationType;
+                if (+data.installationType===0){
+                    installationType='无需安装'
+                }else if (+data.installationType===1){
+                    installationType='安装'
+                }
+                    layer.open({
+                    type: 1 //此处以iframe举例
+                    , title: '商品信息'
+                    , area: ['800px', '800px']
+                    , id: 'LAY_auth'
+                    , shadeClose: true
+                    , anim: 3
+                    , btnAlign: 'c' //居中对齐
+                    , moveType: 1 //拖拽模式，0或者1
+                    , content: '<form class="layui-form" action="" style="padding-top: 15px;">' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">id</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="id" value="' + data.id + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">名称</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="name" value="' + data.name + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">价格</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="price" value="' + data.price + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">图片</label>' +
+                    '<div class="layui-input-inline">' +
+                        '<img class="layui-upload-img" src="' + data.img + '" style="width: 300px;height: 200px;">'+
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">库存</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + data.inventory + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">安装类型</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + installationType + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">安装费</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + data.installationFee + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">属性</label>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" value="' + data.property + '" autocomplete="off" class="layui-input" readonly="readonly">' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>'
+                    , yes: function () {
+                        layer.closeAll();
+                    }
+                });
+                form.render()
+            } else if (obj.event === 'black') {
+                layer.confirm('是否重新上架此商品？', {
+                    skin: 'layui-layer-lan',
+                    anim: 1,
+                    shadeClose: true,
+                    icon: 3,
+                    title: '提示'
+                }, function (index) {
+                    $.post('/web/goodsCommodity/goodsCommodity/s/del/id', {id: data.id,status:0}, function (data) {
+                        if (data.code == '200') {
+                            table.reload('idbaseInfo');
+                        } else {
+                            layer.msg('操作失败')
+                        }
+                        layer.close(index);
+                    }, 'json')
+                });
+            } else if (obj.event === 'del') {
+                layer.confirm('请确认下架该商品', {
+                    skin: 'layui-layer-lan',
+                    anim: 1,
+                    shadeClose: true,
+                    icon: 5,
+                    title: '提示'
+                }, function (index) {
+                    $.post('/web/goodsCommodity/goodsCommodity/s/del/id', {id: data.id,status:1}, function (data) {
+                        if (data.code == '200') {
+                            obj.del();
+                        } else {
+                            layer.msg('删除失败')
+                        }
+                        layer.close(index);
+                    }, 'json')
+                });
+            }
+        });
+
+        var $ = layui.$, active = {
+            reload: function () {
+                var index = layer.msg('查询中，请稍候...', {icon: 16, time: false, shade: 0});
+                setTimeout(function () {
+                    //执行重载
+                    table.reload('idbaseInfo', {
+                        page: {
+                            curr: 1
+                        },
+                        where: {
+                            keyword: $('#name').val(),
+                            status: $("#status").val()
+                        }
+                    });
+                    layer.close(index);
+                }, 800);
+            },
+            report: function (data) {
+                var trading = $("#trading").val();
+                if (trading) {
+                    var startTime = trading.split('～')[0].trim(), endTime = trading.split('～')[1].trim()
+                    var index = layer.msg('正在导出excel，请稍候...', {icon: 16, time: false, shade: 0});
+                    setTimeout(function () {
+                        location.href='/web/goodsCommodity/export/report/s/list?startTime=' + startTime + '&endTime=' + endTime
+                        layer.close(index);
+                    }, 400);
+                } else {
+                    layer.msg('请选择导出的交易时间段', {time: 700, shade: 0.3, shadeClose: true});
+                }
+            }
+        };
+        $('.demoTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+</script>
+</body>
+</html>

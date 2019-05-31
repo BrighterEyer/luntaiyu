@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>商品修改</title>
+    <script charset="utf-8" src="/js/kindeditor-all.js"></script>
+    <script charset="utf-8" src="/js/zh-CN.js"></script>
+    <link rel="stylesheet" href="/css/default.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div th:include="include/left"></div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-form" style="padding: 20px">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">标题</label>
+                        <div class="layui-input-inline">
+                            <input name="id" hidden th:value="${data?.id}">
+                            <input type="text" name="name" th:value="${data?.name}" lay-verify="title"
+                               autocomplete="off" placeholder="请输入标题" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">副标题</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="viceName" th:value="${data?.viceName}" lay-verify="title"
+                               autocomplete="off" placeholder="请输入副标题" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">参与优惠</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="discount" value="0" title="是" th:checked="${data?.discount eq 0}">
+                        <input type="radio" name="discount" value="1" title="否" th:checked="${data?.discount gt 0}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">热销</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="noyesHotsell" value="0" title="非" th:checked="${data?.noyesHotsell eq '0'}">
+                        <input type="radio" name="noyesHotsell" value="1" title="是" th:checked="${data?.noyesHotsell eq '1'}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">安装类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="installationType" value="0" title="无需安装" th:checked="${data?.installationType eq '0'}">
+                        <input type="radio" name="installationType" value="1" title="安装" th:checked="${data?.installationType eq '1'}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">安装价格</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="installationFee" th:value="${data?.installationFee}" placeholder="￥" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">质量</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="type" value="0" title="普通" th:checked="${data?.type eq 0}">
+                        <input type="radio" name="type" value="1" title="优质" th:checked="${data?.type gt 1}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">花纹</label>
+                        <div class="layui-input-inline">
+                            <input type="tel" name="figure" th:value="${data?.figure}" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">保障</label>
+                    <div class="layui-input-block">
+                        <input class="sval" hidden th:value="${data?.goodSecurities}">
+                        <input type="checkbox" name="goodSecuritie" th:each="security:${securityList}" th:value="${security?.id}"
+                               th:title="${security?.name}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">属性</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="property" th:value="${data?.property}" placeholder="￥" autocomplete="off" class="layui-input" readonly>
+                            <!--<input type="checkbox" name="property" th:each="propertie:${data?.properties}" th:value="${propertie?.id}"-->
+                                   <!--th:title="${propertie?.val}" checked disabled="disabled">-->
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">价格</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="price" th:value="${data?.price}" placeholder="￥" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">促销价格</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="promotionPrice" th:value="${data?.promotionPrice}" placeholder="￥" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">搭档价格</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="cooperatePrcie" th:value="${data?.cooperatePrcie}" placeholder="￥" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">会员x价格</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="memberXprcie" th:value="${data?.memberXprcie}" placeholder="￥" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">会员y价格</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="memberYprcie" th:value="${data?.memberYprcie}" placeholder="￥" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">运费单价</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="freightPrcie" th:value="${data?.freightPrcie}" placeholder="￥" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">免运条数</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="freeShipping" th:value="${data?.freeShipping}" lay-verify="required" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">库存</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="inventory" th:value="${data?.inventory}" lay-verify="required" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">购买说明</label>
+                    <div class="layui-input-block">
+                        <textarea placeholder="请输入内容" th:text="${data?.buyInstructions}" name="buyInstructions"
+                                  class="layui-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">分类选择</label>
+                    <div class="layui-input-inline">
+                        <select name="oneClassId" lay-filter="oneClassId">
+                            <option value="">请选择一级分类</option>
+                            <option th:each="category:${categorys}" th:selected="${data?.oneClassId eq category?.id}"
+                                    th:value="${category?.id}" th:if="${category?.fuClassId eq 0}" th:text="${category?.name}"></option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline">
+                        <select name="twoClassId" lay-filter="twoClassId">
+                            <option value="">请选择二级分类</option>
+                            <option th:each="category:${categorys}" th:selected="${data?.twoClassId eq category?.id}"
+                                    th:value="${category?.id}" th:text="${category?.name}"></option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline">
+                        <select name="threeClassId" lay-filter="threeClassId">
+                            <option value="">请选择三级分类</option>
+                            <option th:each="category:${categorys}" th:selected="${data?.threeClassId eq category?.id}"
+                                    th:value="${category?.id}" th:text="${category?.name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item erweimg">
+                    <label class="layui-form-label">主图</label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" id="upload">
+                            <i class="layui-icon">&#xe67c;</i>上传图片
+                        </button>
+                        <div class="layui-upload-list">
+                            <input name="img" type="hidden" th:value="${data?.img}">
+                            <img class="layui-upload-img" height="200" width="300" th:src="${data?.img}">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item erweimg">
+                    <label class="layui-form-label">轮播图</label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" id="goodsImgs">
+                            <i class="layui-icon">&#xe67c;</i>上传图片
+                        </button>
+                        <div class="layui-upload-list">
+                            <input name="goodsImgs" type="hidden" th:value="${data?.goodsImgs}">
+                            <!--<img class="layui-upload-img" height="200" width="300" th:src="${data?.goodsImgs}">-->
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">详情</label>
+                    <div class="layui-input-block">
+                        <textarea class="good_context" style="width:1551px;height:400px;visibility:hidden;display: block;"
+                            th:text="${data?.context}"></textarea>
+                        <p>
+                            <input type="button" id="clean" value="清空内容"/>
+                        </p>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="save">立即提交</button>
+                        <!--<button type="reset" class="layui-btn layui-btn-primary">重置</button>-->
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="include/bottom"></div>
+</div>
+<script>
+    var editor;
+    $(function () {
+        KindEditor.ready(function (K) {
+            editor = K.create('.good_context', {
+                //allowFileManager : true
+                items: ["source", "formatblock", "fontname", "fontsize", "forecolor", "hilitecolor", "bold", "italic", "underline", "strikethrough", "justifyleft", "justifycenter", "image", "multiimage"]
+            });
+            K('input[id=clean]').click(function (e) {
+                editor.html('');
+            });
+        });
+        var imgs=$('input[name="goodsImgs"]').val();
+        if (imgs!=='') {
+            if (imgs.indexOf(",")!==-1){
+                imgs=imgs.split(",")
+                $.each(imgs,function () {
+                    $('input[name="goodsImgs"]').parent().append("<img class='layui-upload-img' height='200' width='300' src='"+this+"'>")
+                });
+            }else {
+                $('input[name="goodsImgs"]').parent().append("<img class='layui-upload-img' height='200' width='300' src='"+imgs+"'>")
+            }
+        }
+        var sval=$('.sval').val();
+        var regex=/(?<=id=)[^,]/g;
+        regex=sval.match(regex);
+        if (regex.length>0){
+            $.each(regex,function (i,g) {
+                $('input[name="goodSecuritie"]').each(function () {
+                    if (+$(this).val()===+g) {
+                        $(this).prop("checked",true);
+                    }
+                })
+            })
+        }
+    })
+    layui.use(['form', 'upload', 'layedit'], function () {
+        var form = layui.form, upload = layui.upload;
+        //执行实例
+        var uploadInst = upload.render({
+            elem: '#upload' //绑定元素
+            , url: '/web/slideshowimg/img/s/upload' //上传接口
+            , number: 1
+            , done: function (res, index, upload) {//响应  文件的索引  重新上传的方法
+                $('input[name="img"]').val(res[0])
+                $('input[name="img"]').parent().append("<img class='layui-upload-img goodsImgs' height='200' width='300' src='"+res[0]+"'>")
+            }, error: function (index, upload) {
+                //请求异常回调
+            }
+        });
+        upload.render({
+            elem: '#goodsImgs' //绑定元素
+            , url: '/web/slideshowimg/img/s/upload' //上传接口
+            , number: 1
+            , done: function (res, index, upload) {//响应  文件的索引  重新上传的方法
+                $('input[name="goodsImgs"]').val($('input[name="goodsImgs"]').val()===''?res[0]:$('input[name="goodsImgs"]').val()+','+res[0])
+                $('input[name="goodsImgs"]').parent().append("<img class='layui-upload-img' height='200' width='300' src='"+res[0]+"'>")
+            }, error: function (index, upload) {
+                //请求异常回调
+            },multiple: true
+            ,number: 0
+        });
+
+        form.on('submit(save)', function (data) {
+            var data = data.field;
+            delete data.file;
+            var goodSecurities=[];
+            $("form input[name=goodSecuritie]:checked").each(function () {
+                goodSecurities.push($(this).val())
+            })
+            data.goodSecuritie=goodSecurities;
+            data.context=editor.html();
+            var index = layer.msg('正在保存信息，请稍候...', {icon: 16, time: false, shade: 0});
+            setTimeout(function () {
+                $.ajax({
+                    url:"/web/goodsCommodity/goodsCommodity/update/save/s/id",
+                    data:JSON.stringify(data),
+                    type:"post",
+                    contentType:"application/json",
+                    dataType:"json",
+                    success:function(datas){
+                        if (datas.code == '200') {
+                            layer.msg('保持成功', {icon: 6, time: 1000, shade: 0}, function () {
+                                location.href = '/web/goodsCommodity/find/goodsCommodity/s/view';
+                            })
+                        } else {
+                            layer.msg(datas.msg, {icon: 5, time: 800, shade: 0})
+                        }
+                    }
+                });
+            }, 500);
+            return false;
+        });
+
+        form.on('checkbox(property)', function (data) {
+            var str='';
+            if (data.elem.checked){
+                str+='<div class="layui-input-block property" title="'+$(this).prop("title")+'">';
+                var val=data.value.split(",");
+                $.each(val,function () {
+                    str+='<input type="checkbox" lay-filter="propertys" title="'+this+'" >'
+                })
+                str+='</div>';
+                if ($(this).parent().parent().find('table').length>0){
+                    $(this).parent().parent().find('table').before(str)
+                }else {
+                    $(this).parent().parent().append(str);
+                }
+            }else {
+                var title=$(this).prop("title");
+                $(this).parent().parent().find('.property').each(function (i) {
+                    if ($(this).prop('title')===title) {
+                        $(this).remove()
+                    }
+                })
+            }
+            base(this);
+        });
+        form.on('checkbox(propertys)', function (data) {
+            base(this);
+        });
+
+        form.on('select(oneClassId)', function(data){
+            if (data.value!==''){
+                $.ajax({
+                    url:"/web/goodsClassification/find/category/s/list",
+                    data:{page:1,pageSize:100,type:1,id:data.value},
+                    type:"get",
+                    success:function(datas){
+                        datas=JSON.parse(datas);
+                        $("select[name=twoClassId]").html('<option value="">请选择二级分类</option>'); //清空
+                        if(+datas.code===1){
+                            $.each(datas.data, function(key, val) {
+                                var option1 = $("<option>").val(val.id).text(val.name);
+                                $("select[name=twoClassId]").append(option1);
+                                form.render('select');
+                            });
+                        }else{
+                            form.render('select');
+                        }
+                        $("select[name=twoClassId]").get(0).selectedIndex=0;
+                    }
+                });
+            }
+        });
+
+        form.on('select(twoClassId)', function(data){
+            if (data.value!==''){
+                $.ajax({
+                    url:"/web/goodsClassification/find/category/s/list",
+                    data:{page:1,pageSize:100,type:1,id:data.value},
+                    type:"get",
+                    success:function(datas){
+                        datas=JSON.parse(datas);
+                        $("select[name=threeClassId]").html('<option value="">请选择三级分类</option>'); //清空
+                        if(+datas.code===1){
+                            $.each(datas.data, function(key, val) {
+                                var option1 = $("<option>").val(val.id).text(val.name);
+                                $("select[name=threeClassId]").append(option1);
+                                form.render('select');
+                            });
+                        }else{
+                            form.render('select');
+                        }
+                        $("select[name=threeClassId]").get(0).selectedIndex=0;
+                    }
+                });
+            }
+        });
+
+        function base(thiz) {
+            var str='';
+            var base=$(thiz).parent().parent().find(".property");
+            var arr=[];
+            base.each(function (i,o) {
+                if ($(this).find("input:checked").length===0){
+                    base.splice(i,1);
+                }
+            })
+            for (var i=0;i<base.length;i++){
+                if ($(base[i]).find("input:checked").length>0){
+                    arr[i]=new Array();
+                    $(base[i]).find("input:checked").each(function (j,o) {
+                        arr[i][j]=$(this).prop("title")
+                    })
+                }
+            }
+            var arry=combine(arr)
+            if (arr.length>0){
+                for (var i=0;i<arry.length;i++){
+                    str+='<tr>' +
+                        '<td><input type="text" value="'+arry[i]+'" autocomplete="off" class="layui-input" disabled></td>' +
+                        '<td><input type="text" placeholder="￥" autocomplete="off" class="layui-input"></td>' +
+                        '<td><input type="text" placeholder="￥" autocomplete="off" class="layui-input"></td>' +
+                        '<td><input type="text" placeholder="￥" autocomplete="off" class="layui-input"></td>' +
+                        '<td><input type="text" placeholder="￥" autocomplete="off" class="layui-input"></td>' +
+                        '<td><input type="text" placeholder="￥" autocomplete="off" class="layui-input"></td>' +
+                        '<td><input type="text" placeholder="￥" autocomplete="off" class="layui-input"></td>' +
+                        '<td><input type="text" autocomplete="off" class="layui-input"></td>' +
+                        '<td><input type="text" autocomplete="off" class="layui-input"></td>' +
+                        '</tr>'
+                }
+            }
+            if ($(thiz).parent().parent().find('table').length===0) {
+                $(thiz).parent().parent().append(str);
+            }else {
+                $(thiz).parent().parent().find('table tbody').html(str);
+            }
+            form.render();
+        }
+    });
+
+    function combine(arr) {
+        var r = [];
+        (function f(t, a, n) {
+            if (n == 0) return r.push(t);
+            for (var i = 0; i < a[n-1].length; i++) {
+                f(t.concat(a[n-1][i]), a, n - 1);
+            }
+        })([], arr, arr.length);
+        return r;
+    }
+</script>
+</body>
+</html>
