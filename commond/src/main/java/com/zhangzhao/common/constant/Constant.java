@@ -5,8 +5,6 @@ package com.zhangzhao.common.constant;
  */
 public class Constant {
 
-    //host主机 a
-//    public static final String HOST = "http://192.168.0.7:8080";
 
     //    public static final String HOST = "http://lufeifanweb.yfs.pub";
     public static final String HOST = "http://xfymweb.lefeifan.com";

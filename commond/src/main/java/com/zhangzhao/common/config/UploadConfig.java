@@ -2,7 +2,6 @@ package com.zhangzhao.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +11,6 @@ import javax.annotation.PostConstruct;
  */
 @Component
 @Configuration
-//@PropertySource(value = {"classpath:application-upload.properties"})
 public class UploadConfig {
 
     /* 基础路径 */

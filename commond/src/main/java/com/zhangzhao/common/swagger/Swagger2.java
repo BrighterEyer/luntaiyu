@@ -11,7 +11,6 @@ import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.service.Parameter;
-import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
@@ -67,7 +66,7 @@ public class Swagger2 {
 //	public Docket createAdminRestApi() {
 //		return new Docket(DocumentationType.SPRING_WEB)
 //                .groupName("createAdminRestApi")
-//                .apiInfo(apiInfo("澳门房产Admin-api文档","Restful API文档","1.0"))
+//                .apiInfo(apiInfo("Admin-api文档","Restful API文档","1.0"))
 //				.select()
 //				.apis(RequestHandlerSelectors.basePackage("com.adminController"))
 //				.paths(PathSelectors.any())
